@@ -2,15 +2,25 @@
 using StockAnalyzer.Core.Domain;
 using StockAnalyzer.Web.Models;
 using System.Diagnostics;
+using System.Text.Json;
 namespace StockAnalyzer.Web.Controllers;
 
 public class HomeController : Controller
 {
     private static string API_URL = "https://ps-async.fekberg.com/api/stocks";
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        using(var client = new HttpClient())
+        {
+            var responseTask = client.GetAsync($"{API_URL}/MSFT");
+            var response = await responseTask;
+            var content = await response.Content.ReadAsStringAsync();
+            // deserialize the JSON string into the expected collection type
+            var data = JsonSerializer.Deserialize<IEnumerable<StockPrice>>(content, JsonSerializerOptions.Web);
+            return View(data);
+        }
+        
     }
 
     public IActionResult Privacy()

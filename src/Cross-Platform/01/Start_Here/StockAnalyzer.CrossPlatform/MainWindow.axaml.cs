@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,21 +32,29 @@ public partial class MainWindow : Window
     private static string API_URL = "https://ps-async.fekberg.com/api/stocks";
     private Stopwatch stopwatch = new Stopwatch();
 
-    private void Search_Click(object sender, RoutedEventArgs e)
+    private async void Search_Click(object sender, RoutedEventArgs e)
     {
         BeforeLoadingStockData();
 
-        var client = new WebClient();
-
-        var content = client.DownloadString($"{API_URL}/{StockIdentifier.Text}");
+        //var client = new WebClient();
+        using(var client = new HttpClient())
+        {
+            var responseTask = client.GetAsync($"{API_URL}/{StockIdentifier.Text}");
+            var response = await responseTask;
+            var content = await response.Content.ReadAsStringAsync();
+            // deserialize the JSON string into the expected collection type
+            var data = JsonSerializer.Deserialize<IEnumerable<StockPrice>>(content, JsonSerializerOptions.Web);
+            Stocks.ItemsSource = data;
+        }
+        //var content = client.DownloadString($"{API_URL}/{StockIdentifier.Text}");
 
         // Simulate that the web call takes a very long time
-        Thread.Sleep(10000);
+        //Thread.Sleep(10000);
 
-        var data = JsonSerializer.Deserialize<IEnumerable<StockPrice>>(content, JsonSerializerOptions.Web);
+        //var data = JsonSerializer.Deserialize<IEnumerable<StockPrice>>(content, JsonSerializerOptions.Web);
 
         // This is the same as ItemsSource in WPF used in the course videos
-        Stocks.ItemsSource = data;
+        //Stocks.ItemsSource = data;
 
         AfterLoadingStockData();
     }
