@@ -38,13 +38,13 @@ public partial class MainWindow : Window
     private static string API_URL = "https://ps-async.fekberg.com/api/stocks";
     private Stopwatch stopwatch = new Stopwatch();
 
-    private void Search_Click(object sender, RoutedEventArgs e)
+    private async void Search_Click(object sender, RoutedEventArgs e)
     {
         try
         {
             BeforeLoadingStockData();
 
-            Task.Run(()=> {
+            await Task.Run(()=> {
                 var lines = File.ReadAllLines("StockPrices_Small.csv");
                 var data = new List<StockPrice>();
                 foreach(var line in lines.Skip(1))
