@@ -43,8 +43,8 @@ public partial class MainWindow : Window
         {
             BeforeLoadingStockData();
 
-            //Task.Run(()=>
-            //{
+            Task.Run(()=>
+            {
                 var lines = File.ReadAllLines("StockPrices_Small.csv");
                 var data = new List<StockPrice>();
                 foreach(var line in lines.Skip(1))
@@ -54,7 +54,7 @@ public partial class MainWindow : Window
                 }
 
                 Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
-            //});
+            });
         }
         catch (Exception ex)
         {
