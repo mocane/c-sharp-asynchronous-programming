@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
+using Avalonia.Threading;
 
 namespace StockAnalyzer.CrossPlatform;
 
@@ -43,8 +44,7 @@ public partial class MainWindow : Window
         {
             BeforeLoadingStockData();
 
-            Task.Run(()=>
-            {
+            Task.Run(()=> {
                 var lines = File.ReadAllLines("StockPrices_Small.csv");
                 var data = new List<StockPrice>();
                 foreach(var line in lines.Skip(1))
@@ -53,7 +53,10 @@ public partial class MainWindow : Window
                     data.Add(price);
                 }
 
-                Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+                });
             });
         }
         catch (Exception ex)
@@ -66,26 +69,21 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task GetStocks()
-    {
-        try
-        {
-            var store = new DataStore();
+    // private async Task GetStocks()
+    // {
+    //     try
+    //     {
+    //         var store = new DataStore();
 
-            var responseTask = store.GetStockPrices(StockIdentifier.Text);
+    //         var responseTask = store.GetStockPrices(StockIdentifier.Text);
 
-            Stocks.ItemsSource = await responseTask;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
-    }
-
-
-
-
-
+    //         Stocks.ItemsSource = await responseTask;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         throw;
+    //     }
+    // }
 
     private void BeforeLoadingStockData()
     {
