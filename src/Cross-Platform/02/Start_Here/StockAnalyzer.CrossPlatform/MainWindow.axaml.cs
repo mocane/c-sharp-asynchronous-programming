@@ -14,6 +14,8 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
+using System.Linq;
 
 namespace StockAnalyzer.CrossPlatform;
 
@@ -35,13 +37,24 @@ public partial class MainWindow : Window
     private static string API_URL = "https://ps-async.fekberg.com/api/stocks";
     private Stopwatch stopwatch = new Stopwatch();
 
-    private async void Search_Click(object sender, RoutedEventArgs e)
+    private void Search_Click(object sender, RoutedEventArgs e)
     {
         try
         {
             BeforeLoadingStockData();
 
-            await GetStocks();
+            //Task.Run(()=>
+            //{
+                var lines = File.ReadAllLines("StockPrices_Small.csv");
+                var data = new List<StockPrice>();
+                foreach(var line in lines.Skip(1))
+                {
+                    var price = StockPrice.FromCSV(line);
+                    data.Add(price);
+                }
+
+                Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+            //});
         }
         catch (Exception ex)
         {
